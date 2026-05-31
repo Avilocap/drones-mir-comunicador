@@ -1,0 +1,33 @@
+{
+  "operador": {
+    "email": "persona@example.com",
+    "telefono": "+34000000000"
+  },
+  "actividad": {
+    "tipo": "Vuelo recreativo",
+    "fecha": "31/05/2026",
+    "hora_inicio": "09:00",
+    "hora_fin": "10:00",
+    "lugar": "Zona de ejemplo",
+    "altura_metros": 120,
+    "zona_geojson": {
+      "type": "FeatureCollection",
+      "features": []
+    }
+  },
+  "piloto": {
+    "tipo_documento": "DNI",
+    "documento": "00000000T",
+    "nombre": "Nombre",
+    "apellido1": "Apellido"
+  },
+  "uas": {
+    "fabricante": "DJI",
+    "modelo": "Modelo",
+    "numero_serie": "REDACTADO",
+    "matricula_operador": "ESP000000000000",
+    "mtom_gramos": 249,
+    "autonomia_minutos": 30
+  }
+}
+

@@ -1,0 +1,18 @@
+.venv/
+.java-build/
+__pycache__/
+*.pyc
+.DS_Store
+lessons.md
+.env
+.env.*
+*.p12
+*.pfx
+*.pem
+*.key
+
+# HARs and generated evidence can contain personal data, certificates metadata,
+# session state, communication IDs, and signatures.
+*.har
+artifacts/*
+!artifacts/.gitkeep
