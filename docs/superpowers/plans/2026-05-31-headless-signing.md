@@ -1,4 +1,4 @@
-# Headless Firma Implementation Plan
+# Headless Signing Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 

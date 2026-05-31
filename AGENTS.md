@@ -1,58 +1,56 @@
 # AGENTS.md
 
-Actua como ingeniero senior: conciso, directo y orientado a ejecucion. Mantén
-el proyecto pequeno, explicito y facil de depurar.
+Act as a senior engineer: concise, direct, execution-focused, and pragmatic.
+Keep this project small, explicit, and easy to debug.
 
-## Reglas de seguridad
+## Safety Rules
 
-- No ejecutes presentaciones reales sin autorizacion explicita del usuario en el
-  turno actual. En este proyecto, `--sign` presenta comunicaciones reales,
-  tambien con `--sign-mode headless`.
-- No borres, canceles, modifiques ni sustituyas comunicaciones ya registradas
-  salvo peticion explicita.
-- No imprimas ni guardes en documentacion contrasenas, contenido del `.p12`,
-  claves PEM, SAML completo, cookies, certificados, firmas ni payloads crudos de
-  AutoFirma.
-- Trata `*.har`, `.env`, `*.p12`, `artifacts/` y PDFs oficiales como material
-  sensible. No los subas a git.
-- Si descargas justificantes o PDFs, guárdalos en `artifacts/` salvo que el
-  usuario indique otra ruta.
+- Do not run real submissions without explicit user authorization in the current
+  turn. In this project, `--sign` submits real communications, including when
+  `--sign-mode headless` is used.
+- Do not delete, cancel, modify, or replace already registered communications
+  unless explicitly requested.
+- Do not print or document passwords, `.p12` contents, PEM keys, full SAML
+  payloads, cookies, certificates, signatures, or raw AutoFirma payloads.
+- Treat `*.har`, `.env`, `*.p12`, `artifacts/`, and official PDFs as sensitive
+  material. Do not commit them.
+- If official PDFs or acknowledgements are downloaded, save them under
+  `artifacts/` unless the user asks for another path.
 
-## Ejecucion
+## Execution
 
-- Usa `uv run ...` para ejecutar comandos Python del proyecto.
-- En este entorno, antepon `rtk` a comandos de shell.
-- Para diagnosticos de red contra la sede, usa `--insecure` solo porque ya fue
-  necesario en esta investigacion local.
-- Antes de decir que algo funciona, verifica con una ejecucion real o con
-  `python -m compileall src/drones_mir_comunicador` cuando aplique.
+- Use `uv run ...` for project Python commands.
+- In this environment, prefix shell commands with `rtk`.
+- Use `--insecure` for network diagnostics against the government site only
+  because it was required during this local investigation.
+- Before claiming something works, verify with a real run or with
+  `python -m compileall src/drones_mir_comunicador` when applicable.
 
-## Estilo de implementacion
+## Implementation Style
 
-- Prefiere funciones pequenas y datos explicitos.
-- No introduzcas frameworks ni dependencias grandes para resolver parsing o
-  peticiones HTTP sencillas.
-- Reutiliza los helpers existentes de login, formularios, P12 y AutoFirma.
-- Edita ficheros manualmente con `apply_patch`.
-- Mantén ASCII en codigo y documentacion salvo que el fichero ya use caracteres
-  acentuados o el texto lo necesite claramente.
+- Prefer small functions and explicit data.
+- Do not introduce frameworks or large dependencies for simple HTTP or parsing
+  tasks.
+- Reuse the existing login, form, P12, and AutoFirma helpers.
+- Use `apply_patch` for manual file edits.
+- Keep code and docs ASCII unless the file already needs non-ASCII text.
 
-## Particularidades de la sede
+## Site-Specific Notes
 
-- La app es JSF/PrimeFaces y depende de `javax.faces.ViewState`.
-- Los partial responses actualizan el `ViewState`; conserva el ultimo valor.
-- No incluyas todos los botones HTML como campos de formulario. En JSF eso puede
-  ejecutar acciones no deseadas como limpiar piloto o UAS.
-- El parser local debe recoger `input`, `select` y `textarea`; los botones se
-  anaden solo cuando se quiere pulsar una accion concreta.
-- Para entrar desde Cl@ve a drones, el `Referer` de `/drones-web/clave` y
-  `/drones-web/acceso` debe ser `https://pasarela.clave.gob.es/`.
-- Despues de `/firmaOk`, reproduce el AJAX automatico de registro antes de ir a
-  `/resultado`; si no, la comunicacion puede no aparecer en el listado.
+- The app is JSF/PrimeFaces and depends on `javax.faces.ViewState`.
+- Partial responses update `ViewState`; keep the latest value.
+- Do not include every HTML button as a form field. In JSF, sending a button by
+  mistake can execute unwanted actions such as clearing pilot or UAS data.
+- The local parser should collect `input`, `select`, and `textarea`; buttons are
+  added only for the intended action.
+- To enter drones from Cl@ve, the `Referer` for `/drones-web/clave` and
+  `/drones-web/acceso` must be `https://pasarela.clave.gob.es/`.
+- After `/firmaOk`, reproduce the automatic registration AJAX before going to
+  `/resultado`; otherwise the communication may not appear in the listing.
 
-## Comandos de referencia
+## Reference Commands
 
-Validar sin presentar:
+Validate without submitting:
 
 ```bash
 rtk proxy uv run drones-communication --insecure \
@@ -61,7 +59,7 @@ rtk proxy uv run drones-communication --insecure \
   --height 120
 ```
 
-Presentar realmente:
+Submit for real:
 
 ```bash
 rtk proxy uv run drones-communication --insecure \
@@ -71,7 +69,7 @@ rtk proxy uv run drones-communication --insecure \
   --sign
 ```
 
-Presentar realmente sin abrir AutoFirma:
+Submit for real without opening AutoFirma:
 
 ```bash
 rtk proxy uv run drones-communication --insecure \
@@ -82,14 +80,15 @@ rtk proxy uv run drones-communication --insecure \
   --sign-mode headless
 ```
 
-Compilar:
+Compile:
 
 ```bash
 rtk proxy uv run python -m compileall src/drones_mir_comunicador
 ```
 
-## Documentacion viva
+## Living Documentation
 
-- Actualiza `lessons.md` cuando descubras un endpoint, parametro, fallo o
-  workaround nuevo.
-- Actualiza `README.md` solo con informacion de uso estable.
+- Update `lessons.md` when a new endpoint, parameter, failure, or workaround is
+  discovered. This file is intentionally ignored because it may contain
+  sensitive investigation notes.
+- Update `README.md` only with stable usage information.

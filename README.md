@@ -1,58 +1,61 @@
 # drones-mir-comunicador
 
-Proyecto formativo para investigar si la comunicacion de vuelo de drones del MIR/SES puede automatizarse por HTTP, sin usar la web interactiva.
+Educational project for researching whether the Spanish MIR/SES drone flight
+communication flow can be automated over HTTP, without using the interactive
+website.
 
-Estado actual: cliente HTTP funcional para login con certificado, clonado, validacion,
-firma con AutoFirma o con el prototipo headless, y presentacion real cuando se
-usa `--sign`.
+Current status: the HTTP client can log in with a certificate, clone an existing
+communication, update flight data, validate the JSF form, sign either with
+AutoFirma or with the experimental headless signer, and submit a real filing
+when `--sign` is used.
 
-## Objetivo
+## Goals
 
-- Analizar HARs exportados desde navegador sin imprimir datos personales.
-- Entender el flujo JSF/PrimeFaces y AutoFirma.
-- Construir incrementalmente un cliente HTTP reproducible.
-- Mantener cualquier envio real detras de una accion explicita.
+- Analyze browser-exported HAR files without printing personal data.
+- Understand the JSF/PrimeFaces and AutoFirma flow.
+- Build a reproducible HTTP client incrementally.
+- Keep every real filing behind an explicit action.
 
-## Instalacion
+## Installation
 
 ```bash
 uv sync
 ```
 
-## Uso inicial
+## Usage
 
-Analizar un HAR:
-
-```bash
-uv run drones-har-summary /Users/david/Downloads/drones.ses.mir.es.har
-```
-
-Ver la secuencia JSF/AutoFirma sin valores de formulario:
+Analyze a HAR:
 
 ```bash
-uv run drones-har-flow /Users/david/Downloads/drones.ses.mir.es.completo.har
+uv run drones-har-summary /path/to/drones.ses.mir.es.har
 ```
 
-Extraer solo el flujo AutoFirma y el resultado de lote:
+Show the JSF/AutoFirma sequence without form values:
 
 ```bash
-uv run drones-har-autofirma /Users/david/Downloads/drones.ses.mir.es.completo.all.har
+uv run drones-har-flow /path/to/drones.ses.mir.es.completo.har
 ```
 
-Probar que el `.p12` local sirve como certificado TLS de cliente:
+Extract only the AutoFirma flow and batch result:
+
+```bash
+uv run drones-har-autofirma /path/to/drones.ses.mir.es.completo.all.har
+```
+
+Check that the local `.p12` can be used as a TLS client certificate:
 
 ```bash
 uv run drones-cert-probe
 ```
 
-Probar el login SAML directo al tramite de drones sin presentar nada:
+Test direct SAML login to the drone procedure without submitting anything:
 
 ```bash
 uv run drones-login-probe --insecure
 ```
 
-Clonar la ultima comunicacion, cambiar datos de actividad, validar, firmar con
-AutoFirma y presentar:
+Clone the latest communication, update activity data, validate, sign with
+AutoFirma, and submit:
 
 ```bash
 uv run drones-communication --insecure \
@@ -62,16 +65,17 @@ uv run drones-communication --insecure \
   --sign
 ```
 
-Sin `--sign`, el comando solo valida el formulario contra la sede y no presenta.
+Without `--sign`, the command only validates the form against the government
+site and does not submit a filing.
 
-Preparar el puente headless de firma sin firmar ni presentar nada:
+Prepare the headless signing bridge without signing or submitting anything:
 
 ```bash
 uv run drones-headless-signer
 ```
 
-Firmar sin abrir AutoFirma visual, usando el `.p12` local y el cliente oficial
-@firma de lotes:
+Sign without opening the AutoFirma desktop app, using the local `.p12` and the
+official @firma batch client:
 
 ```bash
 uv run drones-communication --insecure \
@@ -82,47 +86,59 @@ uv run drones-communication --insecure \
   --sign-mode headless
 ```
 
-`--sign --sign-mode headless` tambien presenta una comunicacion real: solo evita
-la ventana de AutoFirma.
+`--sign --sign-mode headless` still submits a real communication. It only avoids
+opening the AutoFirma UI.
 
-Exportar resumen JSON:
+Export a JSON summary:
 
 ```bash
-uv run drones-har-summary /Users/david/Downloads/drones.ses.mir.es.har --json
+uv run drones-har-summary /path/to/drones.ses.mir.es.har --json
 ```
 
-## Hallazgos del HAR inicial
+## Initial HAR Findings
 
-- La app usa JSF/PrimeFaces y `javax.faces.ViewState`.
-- El formulario principal se publica contra `/drones-web/formulario`.
-- El flujo de firma pasa por `servicio.mir.es/fire-signature/public/afirma`.
-- Despues de AutoFirma vuelve a `/drones-web/firmaOk`, `/resultado` y `/comunicacion`.
-- El HAR no contiene el HTML inicial completo de `altaComunicacion`; solo peticiones posteriores.
+- The app uses JSF/PrimeFaces and `javax.faces.ViewState`.
+- The main form posts to `/drones-web/formulario`.
+- The signing flow goes through `servicio.mir.es/fire-signature/public/afirma`.
+- After AutoFirma, the browser returns to `/drones-web/firmaOk`, `/resultado`,
+  and `/comunicacion`.
+- The first HAR did not contain the full initial `altaComunicacion` HTML, only
+  later requests.
 
-## Hallazgos del HAR completo All
+## Complete HAR Findings
 
-- El alta entra por `GET /drones-web/altaComunicacion`.
-- El boton de alta hace `POST /drones-web/altaComunicacion` y redirige a `/drones-web/formulario?enNombrePropio=true&accion=INSERTAR`.
-- El boton `formCampos:btnFirmar` valida el formulario completo.
-- El boton `formFirma:btnFirmar` inicia la firma.
-- La sede abre `ChooseCertificateOrigin.jsp` con `op=batch`, `transactionid`, `subjectid` y `errorurl`.
-- `chooseCertificateOriginService` recibe `certorigin`, `op`, `subjectid`, `transactionid` y `errorurl`.
-- AutoFirma trabaja contra `/fire-signature/public/afirma/retrieve` y devuelve a `miniappletSuccessService`.
-- El resultado final de AutoFirma es un `afirmabatchresult` con dos elementos `DONE_AND_SAVED`: XML de datos y PDF.
-- Una peticion limpia sin sesion a `/altaComunicacion` redirige a `https://sede.interior.gob.es`; el script necesitara resolver autenticacion/sesion antes de llegar al formulario.
+- New communications start with `GET /drones-web/altaComunicacion`.
+- The create button posts to `/drones-web/altaComunicacion` and redirects to
+  `/drones-web/formulario?enNombrePropio=true&accion=INSERTAR`.
+- `formCampos:btnFirmar` validates the complete form.
+- `formFirma:btnFirmar` starts the signature flow.
+- The site opens `ChooseCertificateOrigin.jsp` with `op=batch`,
+  `transactionid`, `subjectid`, and `errorurl`.
+- `chooseCertificateOriginService` receives `certorigin`, `op`, `subjectid`,
+  `transactionid`, and `errorurl`.
+- AutoFirma works against `/fire-signature/public/afirma/retrieve` and returns
+  to `miniappletSuccessService`.
+- AutoFirma's final result is an `afirmabatchresult` with two `DONE_AND_SAVED`
+  entries: the data XML and the PDF.
+- A clean unauthenticated request to `/altaComunicacion` redirects to
+  `https://sede.interior.gob.es`; the script must resolve authentication and
+  session state before reaching the form.
 
-## Enfoque previsto
+## Approach
 
-1. Reproducir login, clonado y validacion desde una sesion HTTP limpia.
-2. Extraer `ViewState` y campos dinamicos desde HTML/partial responses.
-3. Invocar AutoFirma mediante `afirma://batch`.
-4. Alternativamente, firmar el lote en modo headless con `BatchSigner` oficial.
-5. Completar el registro post-firma en `/firmaOk` y confirmar `/resultado`.
+1. Reproduce login, cloning, and validation from a clean HTTP session.
+2. Extract `ViewState` and dynamic fields from HTML/partial responses.
+3. Invoke AutoFirma through `afirma://batch`.
+4. Alternatively, sign the batch in headless mode with the official
+   `BatchSigner`.
+5. Complete post-signature registration at `/firmaOk` and confirm `/resultado`.
 
-## Seguridad
+## Security
 
-No guardes HARs reales, certificados, firmas, justificantes o datos personales en git. El proyecto ignora `*.har`, `.env`, certificados y `artifacts/` por defecto.
+Do not commit real HAR files, certificates, signatures, official PDFs,
+acknowledgements, or personal data. The project ignores `*.har`, `.env`,
+certificate files, and `artifacts/` by default.
 
-`--sign` presenta comunicaciones reales. Revisar fecha, lugar, altura y poligono antes de usarlo.
-El modo headless carga el `.p12` y la contrasena en memoria localmente; no
-imprime la contrasena ni manda el batch por argumentos de proceso.
+`--sign` submits real communications. Review date, location, height, and polygon
+before using it. Headless mode loads the `.p12` and password in local memory; it
+does not print the password or pass the batch data as process arguments.

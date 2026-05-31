@@ -1,7 +1,7 @@
 [project]
 name = "drones-mir-comunicador"
 version = "0.1.0"
-description = "Investigacion formativa del flujo de comunicaciones de vuelo UAS del MIR/SES."
+description = "Educational investigation of the MIR/SES UAS flight communication flow."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
